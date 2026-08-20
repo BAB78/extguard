@@ -1,0 +1,145 @@
+{
+  "name": "extguard-security",
+  "displayName": "ExtGuard",
+  "description": "Audits installed VS Code extensions for security risks, leaked secrets, and malicious behavior.",
+  "version": "1.0.2",
+  "publisher": "babstudios",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "extguard-security-sidebar",
+          "title": "ExtGuard Security",
+          "icon": "media/shield.svg"
+        }
+      ]
+    },
+    "views": {
+      "extguard-security-sidebar": [
+        {
+          "id": "extguard-security-risks",
+          "name": "Extension Security Status",
+          "type": "tree"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "extguardSecurity.scan",
+        "title": "ExtGuard: Scan Extensions",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "extguardSecurity.allowlistPublisher",
+        "title": "ExtGuard: Allowlist Publisher"
+      },
+      {
+        "command": "extguardSecurity.scanVsix",
+        "title": "ExtGuard: Scan a .vsix File Before Installing",
+        "icon": "$(package)"
+      },
+      {
+        "command": "extguardSecurity.cleanDuplicates",
+        "title": "ExtGuard: Remove Superseded Extension Versions",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "extguardSecurity.showFeedInfo",
+        "title": "ExtGuard: Show Threat Database Info",
+        "icon": "$(info)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "extguardSecurity.scan",
+          "when": "view == extguard-security-risks",
+          "group": "navigation"
+        },
+        {
+          "command": "extguardSecurity.scanVsix",
+          "when": "view == extguard-security-risks",
+          "group": "navigation@2"
+        },
+        {
+          "command": "extguardSecurity.cleanDuplicates",
+          "when": "view == extguard-security-risks",
+          "group": "1_extguard"
+        },
+        {
+          "command": "extguardSecurity.showFeedInfo",
+          "when": "view == extguard-security-risks",
+          "group": "1_extguard"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ExtGuard Settings",
+      "properties": {
+        "extguard.allowedPublishers": {
+          "type": "array",
+          "default": [],
+          "description": "List of trusted publisher IDs whose extensions will bypass certain security flags.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extguard.checkMarketplace": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Check each installed extension against the Visual Studio Marketplace. An extension that is installed but no longer published has usually been removed by Microsoft, which is the strongest available signal that something is wrong.\n\n**This is the only feature that uses the network.** It is off by default. When enabled, only extension IDs are sent: never file contents, paths, or findings."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./ && node scripts/copy-assets.mjs",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "jest",
+    "feed": "node scripts/update-threat-feed.mjs",
+    "scan:real": "npm run compile && node scripts/scan-real-machine.mjs",
+    "icon": "node scripts/make-icon.mjs",
+    "prune": "node scripts/prune-duplicates.mjs",
+    "preflight": "node scripts/preflight.mjs"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
+    "@types/vscode": "^1.75.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BAB78/extguard"
+  },
+  "bugs": {
+    "url": "https://github.com/BAB78/extguard/issues"
+  },
+  "homepage": "https://github.com/BAB78/extguard#readme",
+  "license": "MIT",
+  "keywords": [
+    "audit",
+    "extension-audit",
+    "extensions",
+    "malicious-extensions",
+    "secrets",
+    "secrets-scanner",
+    "security",
+    "supply-chain",
+    "vscode-security"
+  ],
+  "icon": "media/icon.png"
+}

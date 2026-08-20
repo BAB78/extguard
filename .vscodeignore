@@ -1,0 +1,26 @@
+.vscode/**
+.vscode-test/**
+src/**
+!src/scanner/blocklist.json
+node_modules/**
+.gitignore
+tsconfig.json
+jest.config.js
+**/*.test.ts
+**/*.test.js
+**/*.map
+docs/**
+backend/**
+landing/**
+SECURITY.md
+
+# Dev tooling. Not needed at runtime and should not be readable in the shipped package.
+scripts/**
+backend/**
+landing/**
+docs/**
+scan_test.ts
+scan-results.json
+**/*.test.ts
+**/*.map
+.git/**

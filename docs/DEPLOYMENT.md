@@ -20,6 +20,22 @@ Railway should contain three services in one project:
 Railway documents the root directory requirement for isolated monorepos at
 <https://docs.railway.com/deployments/monorepo>.
 
+## 0. Run the local gate first
+
+Before touching a hosted account, confirm the container sequence works on your machine. This
+boots a throwaway PostgreSQL, runs the migration exactly as the Dockerfile CMD does, starts the
+compiled server, and polls the same `/health` path Railway is configured to use:
+
+```bash
+cd backend
+npm test        # 20 tests, including the real-database suite
+npm run smoke   # migrate, boot, healthcheck, shutdown
+```
+
+Both must pass before you deploy. Nothing here contacts Stripe or Railway, and no account is
+needed. Graceful shutdown is skipped on Windows because Windows has no real SIGTERM; confirm it
+from the Railway logs on your first redeploy instead.
+
 ## 1. Create the Stripe test product
 
 In Stripe test mode:

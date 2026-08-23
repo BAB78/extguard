@@ -5,6 +5,9 @@ import type { MaliciousMatch, CapabilityNote } from '../scanner/blocklistScanner
 import { scanPermissions, PermissionAlert } from '../scanner/permissionScanner';
 import { scanDirectoryAsync, Finding } from '../scanner/secretScanner';
 import { checkMarketplaceStatus, MarketplaceStatus } from '../scanner/marketplace';
+import type { ReportableExtension } from '../team/report';
+import type { TeamController } from '../team/teamController';
+import type { TeamState } from '../team/teamSession';
 
 export class RiskTreeProvider implements vscode.TreeDataProvider<RiskTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<RiskTreeItem | undefined | null | void> = new vscode.EventEmitter<RiskTreeItem | undefined | null | void>();
@@ -13,11 +16,18 @@ export class RiskTreeProvider implements vscode.TreeDataProvider<RiskTreeItem> {
     private cachedResults: Map<string, ExtensionAuditResult> = new Map();
     private isScanning = false;
     private marketplace: Map<string, MarketplaceStatus> = new Map();
+    private scanRevision = 0;
+    private lastReportedRevision = -1;
 
-    constructor() {}
+    constructor(private readonly team?: TeamController) {}
 
     refresh(): void {
         this.cachedResults.clear();
+        this.scanRevision++;
+        this._onDidChangeTreeData.fire();
+    }
+
+    refreshTeamState(): void {
         this._onDidChangeTreeData.fire();
     }
 
@@ -95,7 +105,15 @@ export class RiskTreeProvider implements vscode.TreeDataProvider<RiskTreeItem> {
                     return String(a.label ?? '').localeCompare(String(b.label ?? ''));
                 });
 
-                return items;
+                if (this.team && this.lastReportedRevision !== this.scanRevision) {
+                    this.lastReportedRevision = this.scanRevision;
+                    // Team reporting is deliberately downstream of the complete local scan.
+                    // It is fire-and-forget so entitlement or network failures can never gate,
+                    // delay, or weaken the free results rendered below.
+                    void this.team.uploadScan(items.map(toReportableExtension)).catch(() => undefined);
+                }
+
+                return this.team ? [new TeamStatusItem(this.team.state), ...items] : items;
             } finally {
                 this.isScanning = false;
             }
@@ -210,7 +228,36 @@ interface ExtensionAuditResult {
     codeFindings: Finding[];
 }
 
-export type RiskTreeItem = ExtensionItem | FindingItem;
+export type RiskTreeItem = TeamStatusItem | ExtensionItem | FindingItem;
+
+class TeamStatusItem extends vscode.TreeItem {
+    constructor(state: TeamState) {
+        super(teamLabel(state), vscode.TreeItemCollapsibleState.None);
+        this.command = {
+            command: 'extguardSecurity.teamStatus',
+            title: 'Show ExtGuard Team status',
+        };
+        this.contextValue = `extguardTeam.${state.kind}`;
+
+        if (state.kind === 'active') {
+            this.description = `${state.entitlement.activeSeats}/${state.entitlement.seats} seats`;
+            this.tooltip = 'Team reporting is active. Click to validate entitlement or deactivate this device.';
+            this.iconPath = new vscode.ThemeIcon('organization', new vscode.ThemeColor('testing.iconPassed'));
+        } else if (state.kind === 'checking') {
+            this.description = 'Checking entitlement';
+            this.tooltip = 'Free local scanning remains available while Team entitlement is checked.';
+            this.iconPath = new vscode.ThemeIcon('sync~spin');
+        } else if (state.kind === 'free') {
+            this.description = 'Local scanning active';
+            this.tooltip = 'ExtGuard Free local scanning is active. Click to activate Team reporting.';
+            this.iconPath = new vscode.ThemeIcon('shield');
+        } else {
+            this.description = state.kind === 'inactive' ? 'Activation required' : 'Could not verify';
+            this.tooltip = `${state.message} Free local scanning remains available.`;
+            this.iconPath = new vscode.ThemeIcon('warning', new vscode.ThemeColor('problemsWarningIcon.foreground'));
+        }
+    }
+}
 
 class ExtensionItem extends vscode.TreeItem {
     constructor(
@@ -338,4 +385,28 @@ class FindingItem extends vscode.TreeItem {
             this.iconPath = new vscode.ThemeIcon('info', new vscode.ThemeColor('problemsInfoIcon.foreground'));
         }
     }
+}
+
+function teamLabel(state: TeamState): string {
+    if (state.kind === 'active') return 'ExtGuard Team';
+    if (state.kind === 'checking') return 'ExtGuard Team';
+    if (state.kind === 'free') return 'ExtGuard Free';
+    return 'ExtGuard Team inactive';
+}
+
+function toReportableExtension(item: ExtensionItem): ReportableExtension {
+    const allowed = item.isAllowed;
+    return {
+        id: item.extension.id,
+        name: item.extension.packageJSON.displayName || item.extension.packageJSON.name || item.extension.id,
+        riskScore: allowed ? 0 : item.result.score,
+        malicious: !allowed && Boolean(item.result.malicious),
+        removedFromMarketplace: !allowed && item.result.marketplace?.state === 'not-found',
+        truncated: !allowed && item.result.truncated,
+        permissionSeverities: allowed ? [] : item.result.permissionAlerts.map((finding) => finding.severity),
+        codeFindings: allowed ? [] : item.result.codeFindings.map((finding) => ({
+            category: finding.category,
+            severity: finding.severity,
+        })),
+    };
 }

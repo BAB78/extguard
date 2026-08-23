@@ -12,9 +12,12 @@
 
 - ✅ All extension scanning happens **100% locally** on your device.
 - ✅ Source code analysis, regex matching, and blocklist checks are performed entirely in-process.
-- ✅ No extension metadata, scan results, risk scores, or file contents are ever uploaded to any server.
+- ✅ The free tier never uploads scan results, risk scores, or file contents.
 - ✅ No telemetry, analytics, or usage tracking in the free tier (v1).
-- ✅ No network connections are made during scanning. ExtGuard works fully offline.
+- ✅ Scanning itself makes no network connections. ExtGuard scans fully offline, and the bundled
+  threat feed means a first run works with no connectivity at all.
+- ✅ The only network calls ExtGuard can ever make are ones you turn on: the optional marketplace
+  status lookup, and Team tier reporting. Both are off by default.
 - ✅ Extension files are read from the local file system (`~/.vscode/extensions/`) in read-only mode.
 
 ## What ExtGuard Scans
@@ -26,7 +29,8 @@
 ## What ExtGuard Does NOT Do
 
 - ❌ Does **not** modify, delete, disable, or alter any extension files.
-- ❌ Does **not** send scan results or any data to external servers.
+- ❌ Does **not** send scan results anywhere on the free tier. Nothing leaves your machine unless
+  you enable Team reporting, which is covered in full below.
 - ❌ Does **not** require an internet connection to perform scans.
 - ❌ Does **not** access files outside of VS Code extension directories.
 - ❌ Does **not** interfere with extension functionality or execution.
@@ -35,8 +39,18 @@
 
 The optional **Team tier** allows organizations to report scan results to a self-hosted or managed backend for centralized monitoring. This feature:
 - Is **opt-in only** and requires an explicit license key.
-- Only transmits extension IDs, risk scores, and finding summaries (never source code).
+- Only transmits extension IDs and names, risk scores, fixed finding categories and severities,
+  counts, timestamps, and a product-scoped SHA-256 machine identifier.
+- Never transmits source code, matched secret values, finding descriptions, usernames, absolute
+  file paths, or the raw VS Code machine identifier.
+- Stores the license key and activation JWT only through VS Code SecretStorage.
+- Validates the current Stripe-backed entitlement before each report upload.
 - Can be pointed at your own infrastructure for full data sovereignty.
+
+The Team API hashes license keys, encrypts the recoverable license material, binds JWTs to one
+activation, enforces seat limits in PostgreSQL, verifies Stripe webhooks against their raw body,
+and records webhook event IDs for idempotency. Operational logs must not contain license keys,
+JWTs, Stripe payloads, or report bodies.
 
 ## Reporting a Vulnerability
 

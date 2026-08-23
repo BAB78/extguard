@@ -1,193 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExtGuard: Extension Security Scanner</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0f1117;--card:#1a1d27;--accent:#00d084;--text:#e1e4eb;--muted:#8b8fa3}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-a{color:var(--accent);text-decoration:none}
-.container{max-width:960px;margin:0 auto;padding:0 24px}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ExtGuard audits installed VS Code extensions for leaked secrets, risky capabilities, and known malicious IDs." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https:; form-action 'self' https://checkout.stripe.com" />
+    <title>ExtGuard: Extension Security Scanner</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./config.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="./index.html" aria-label="ExtGuard home"><span class="brand-mark" aria-hidden="true">EG</span><span>ExtGuard</span></a>
+        <nav aria-label="Primary navigation"><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="https://github.com/BAB78/extguard">GitHub</a></nav>
+      </div>
+    </header>
 
-/* Hero */
-.hero{text-align:center;padding:100px 0 60px}
-.hero h1{font-size:3.2rem;margin-bottom:12px}
-.hero h1 span{color:var(--accent)}
-.hero p{font-size:1.25rem;color:var(--muted);max-width:540px;margin:0 auto 32px}
-.btn{display:inline-block;padding:14px 32px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;border:none;transition:transform .15s}
-.btn:hover{transform:translateY(-2px)}
-.btn-primary{background:var(--accent);color:#0f1117}
-.btn-outline{background:transparent;border:2px solid var(--accent);color:var(--accent);margin-left:12px}
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <p class="eyebrow">Local-first extension security</p>
+            <h1>Know what your editor extensions can reach.</h1>
+            <p class="hero-copy">ExtGuard audits installed VS Code extensions for leaked credentials, risky capabilities, and known malicious IDs. Free scans stay on your machine.</p>
+            <div class="actions">
+              <a class="button button-primary" href="https://marketplace.visualstudio.com/items?itemName=babstudios.extguard-security">Install free</a>
+              <a class="button button-secondary" href="#pricing">Compare plans</a>
+            </div>
+          </div>
+          <aside class="trust-card" aria-label="ExtGuard privacy summary">
+            <p class="trust-title">Free tier privacy</p>
+            <ul><li>Local scanning</li><li>No telemetry or account</li><li>No source code uploads</li><li>Bundled threat database</li></ul>
+          </aside>
+        </div>
+      </section>
 
-/* Problem */
-.problem{padding:60px 0;text-align:center}
-.problem h2{font-size:2rem;margin-bottom:16px}
-.problem p{color:var(--muted);max-width:640px;margin:0 auto;font-size:1.05rem}
+      <section class="section" id="features">
+        <div class="container">
+          <p class="eyebrow">What it checks</p>
+          <h2>Useful evidence, not noisy accusations</h2>
+          <div class="feature-grid">
+            <article class="card"><span class="card-index">01</span><h3>Permission auditing</h3><p>Reviews manifests for workspace trust posture, eager activation, and powerful editor integrations.</p></article>
+            <article class="card"><span class="card-index">02</span><h3>Secret scanning</h3><p>Detects credential-shaped values without storing or displaying the secret itself.</p></article>
+            <article class="card"><span class="card-index">03</span><h3>Threat matching</h3><p>Checks installed extension IDs against a threat snapshot shipped inside the extension.</p></article>
+            <article class="card"><span class="card-index">04</span><h3>Clear risk context</h3><p>Separates expected capability from concrete findings and shows the evidence behind each score.</p></article>
+          </div>
+        </div>
+      </section>
 
-/* Features */
-.features{padding:60px 0}
-.features h2{text-align:center;font-size:2rem;margin-bottom:40px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
-.card{background:var(--card);border-radius:12px;padding:28px;border:1px solid #2a2d3a}
-.card h3{margin-bottom:8px;font-size:1.1rem}
-.card p{color:var(--muted);font-size:.95rem}
-.card .icon{font-size:2rem;margin-bottom:12px}
+      <section class="section pricing" id="pricing">
+        <div class="container">
+          <p class="eyebrow">Simple pricing</p>
+          <h2>Start locally. Add Team only when you need it.</h2>
+          <div class="pricing-grid">
+            <article class="price-card">
+              <div><p class="plan-name">Free</p><p class="price">$0 <span>forever</span></p></div>
+              <ul><li>Local extension scanning</li><li>Risk dashboard sidebar</li><li>Manual scans and VSIX checks</li><li>Bundled malicious extension data</li><li>VS Code-compatible editors</li></ul>
+              <a class="button button-secondary full-width" href="https://marketplace.visualstudio.com/items?itemName=babstudios.extguard-security">Install free</a>
+            </article>
 
-/* Pricing */
-.pricing{padding:80px 0;text-align:center}
-.pricing h2{font-size:2rem;margin-bottom:40px}
-.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;max-width:700px;margin:0 auto}
-.tier{background:var(--card);border-radius:12px;padding:36px;border:1px solid #2a2d3a;text-align:left}
-.tier.highlight{border-color:var(--accent)}
-.tier h3{font-size:1.4rem;margin-bottom:4px}
-.tier .price{font-size:2rem;font-weight:700;margin:12px 0}
-.tier .price span{font-size:.9rem;color:var(--muted);font-weight:400}
-.tier ul{list-style:none;margin:20px 0}
-.tier ul li{padding:6px 0;color:var(--muted);font-size:.95rem}
-.tier ul li::before{content:"✓ ";color:var(--accent)}
-.tier .btn{width:100%;text-align:center;margin-top:16px}
+            <article class="price-card highlighted">
+              <div class="plan-heading"><div><p class="plan-name">Team</p><p class="price">$9 <span>per seat, monthly</span></p></div><span class="badge">Optional</span></div>
+              <ul><li>Everything in Free</li><li>Seat-based license activation</li><li>Opt-in sanitized report upload</li><li>Subscription management through Stripe</li><li>No source code or secret values uploaded</li></ul>
+              <form id="checkout-form" class="checkout-form" novalidate>
+                <label for="checkout-email">Work email</label>
+                <input id="checkout-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required placeholder="you@company.com" />
+                <label for="checkout-seats">Seats</label>
+                <input id="checkout-seats" name="seats" type="number" min="1" max="100" step="1" value="1" required />
+                <button id="checkout-button" class="button button-primary full-width" type="submit">Continue to secure checkout</button>
+                <p id="checkout-status" class="form-status" role="status" aria-live="polite"></p>
+              </form>
+              <p class="payment-note">Checkout and card handling are hosted by Stripe. ExtGuard never receives your card number.</p>
+            </article>
+          </div>
+        </div>
+      </section>
 
-/* Footer */
-footer{text-align:center;padding:40px 0;color:var(--muted);font-size:.85rem;border-top:1px solid #2a2d3a}
+      <section class="section boundary-section">
+        <div class="container boundary-grid">
+          <div><p class="eyebrow">A deliberate boundary</p><h2>The scanner stays local.</h2></div>
+          <p>Team reporting is separate, off by default, and available only after license activation. Reports contain extension identifiers and summarized risk results. They do not contain source code, secret values, or absolute file paths.</p>
+        </div>
+      </section>
+    </main>
 
-.pay-trust{margin-top:16px;text-align:center}
-.pay-icons{display:flex;gap:10px;justify-content:center;align-items:center;color:var(--muted);opacity:.85}
-.pay-note{margin-top:10px;font-size:.78rem;line-height:1.5;color:var(--muted)}
-.pay-note strong{color:var(--text,#e6e8eb);font-weight:600}
-</style>
-</head>
-<body>
-
-<section class="hero">
-<div class="container">
-<h1>🛡️ Ext<span>Guard</span></h1>
-<p>Your extensions might be watching you. Find out which ones.</p>
-<a href="https://marketplace.visualstudio.com/items?itemName=babstudios.extguard-security" class="btn btn-primary">Get Started Free</a>
-<a href="#pricing" class="btn btn-outline">See Pricing</a>
-</div>
-</section>
-
-<section class="problem">
-<div class="container">
-<h2>The Problem Nobody Talks About</h2>
-<p>VS Code extensions run with your full system privileges. They can read your SSH keys, execute shell commands, and phone home over the network. The marketplace has had multiple incidents of malicious extensions stealing credentials and crypto wallets. There's no built-in way to audit what your extensions are actually doing.</p>
-</div>
-</section>
-
-<section class="features">
-<div class="container">
-<h2>What ExtGuard Does</h2>
-<div class="grid">
-<div class="card"><div class="icon">🔍</div><h3>Permission Auditing</h3><p>Scans extension manifests for risky configurations like Workspace Trust bypass and eager activation.</p></div>
-<div class="card"><div class="icon">🔑</div><h3>Secret Scanning</h3><p>Detects hardcoded AWS keys, GitHub tokens, Slack webhooks, and other credentials in extension code.</p></div>
-<div class="card"><div class="icon">🚫</div><h3>Malicious Blocklist</h3><p>Cross-references installed extensions against a curated database of known malicious IDs.</p></div>
-<div class="card"><div class="icon">📊</div><h3>Risk Dashboard</h3><p>Color-coded sidebar showing every extension's risk score with expandable finding details.</p></div>
-</div>
-</div>
-</section>
-
-<section class="pricing" id="pricing">
-<div class="container">
-<h2>Simple Pricing</h2>
-<div class="tiers">
-<div class="tier">
-<h3>Free</h3>
-<div class="price">$0 <span>forever</span></div>
-<ul>
-<li>Local extension scanning</li>
-<li>Risk dashboard sidebar</li>
-<li>Manual scan on demand</li>
-<li>Publisher allowlist</li>
-<li>VS Code, Cursor, Windsurf</li>
-</ul>
-<a href="https://marketplace.visualstudio.com/items?itemName=babstudios.extguard-security" class="btn btn-outline">Install Free</a>
-</div>
-<div class="tier highlight">
-<h3>Team</h3>
-<div class="price">$9 <span>/month per seat</span></div>
-<ul>
-<li>Everything in Free</li>
-<li>Continuous background scanning</li>
-<li>Slack & email alerts</li>
-<li>Org-wide extension monitoring</li>
-<li>Centralized risk dashboard</li>
-<li>License key management</li>
-</ul>
-<button id="checkout-btn" class="btn btn-primary">Subscribe</button>
-<div class="pay-trust">
-  <div class="pay-icons" aria-label="Card payments accepted">
-    <svg viewBox="0 0 36 24" width="36" height="24" role="img" aria-label="Credit card">
-      <rect x="1" y="2.5" width="34" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/>
-      <rect x="1" y="7" width="34" height="3.6" fill="currentColor" opacity=".55"/>
-      <rect x="5" y="15" width="9" height="2.4" rx="1.2" fill="currentColor" opacity=".45"/>
-    </svg>
-    <svg viewBox="0 0 36 24" width="36" height="24" role="img" aria-label="Contactless payment">
-      <rect x="1" y="2.5" width="34" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M14 8.5a5.5 5.5 0 0 1 0 7M17.5 6a9 9 0 0 1 0 12M21 3.5a12.5 12.5 0 0 1 0 17"
-            fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>
-    </svg>
-    <svg viewBox="0 0 24 24" width="22" height="22" role="img" aria-label="Secure checkout">
-      <rect x="4" y="10.5" width="16" height="10.5" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
-      <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <p class="pay-note">Secure checkout powered by <strong>Stripe</strong>. Card details are entered on Stripe&rsquo;s own payment page and never touch our servers. Cancel any time.</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-
-<footer>
-<div class="container">
-<p>&copy; 2026 ExtGuard. All scanning happens locally. Your code never leaves your machine.</p>
-</div>
-</footer>
-
-<script>
-// The Team tier needs a backend, which is not deployed yet. Set this to the deployed base
-// URL (Railway and Render both hand you a free subdomain, so a custom domain is optional).
-// Until it is set, the button says so rather than failing on click: a Subscribe button that
-// throws an alert reads as a broken site, which is worse than one that is honestly not ready.
-const API_BASE = '';   // e.g. 'https://extguard-api.up.railway.app'
-
-const btn = document.getElementById('checkout-btn');
-
-if (!API_BASE) {
-  btn.textContent = 'Coming soon';
-  btn.disabled = true;
-  btn.setAttribute('aria-disabled', 'true');
-  btn.style.opacity = '.55';
-  btn.style.cursor = 'not-allowed';
-  const note = document.createElement('p');
-  note.className = 'pay-note';
-  note.textContent = 'The Team tier is not open yet. The free extension is available now and is not time limited.';
-  btn.insertAdjacentElement('afterend', note);
-} else {
-  btn.addEventListener('click', async () => {
-    const email = prompt('Enter your email for the Team subscription:');
-    if (!email) return;
-    btn.disabled = true;
-    const original = btn.textContent;
-    btn.textContent = 'Opening checkout...';
-    try {
-      const res = await fetch(API_BASE + '/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (data.url) { window.location.href = data.url; return; }
-      alert('Checkout could not be started. Please try again, or email support.');
-    } catch (e) {
-      alert('Could not reach the checkout service. Please try again shortly.');
-    }
-    btn.disabled = false;
-    btn.textContent = original;
-  });
-}
-</script>
-</body>
+    <footer>
+      <div class="container footer-grid"><p>Copyright 2026 ExtGuard.</p><div><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a><a href="https://github.com/BAB78/extguard/security">Security</a></div></div>
+    </footer>
+  </body>
 </html>

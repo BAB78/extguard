@@ -56,6 +56,19 @@
         "command": "extguardSecurity.showFeedInfo",
         "title": "ExtGuard: Show Threat Database Info",
         "icon": "$(info)"
+      },
+      {
+        "command": "extguardSecurity.activateTeam",
+        "title": "ExtGuard: Activate Team"
+      },
+      {
+        "command": "extguardSecurity.deactivateTeam",
+        "title": "ExtGuard: Deactivate Team"
+      },
+      {
+        "command": "extguardSecurity.teamStatus",
+        "title": "ExtGuard: Show Team Status",
+        "icon": "$(organization)"
       }
     ],
     "menus": {
@@ -79,6 +92,11 @@
           "command": "extguardSecurity.showFeedInfo",
           "when": "view == extguard-security-risks",
           "group": "1_extguard"
+        },
+        {
+          "command": "extguardSecurity.teamStatus",
+          "when": "view == extguard-security-risks",
+          "group": "2_team"
         }
       ]
     },
@@ -96,7 +114,14 @@
         "extguard.checkMarketplace": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "Check each installed extension against the Visual Studio Marketplace. An extension that is installed but no longer published has usually been removed by Microsoft, which is the strongest available signal that something is wrong.\n\n**This is the only feature that uses the network.** It is off by default. When enabled, only extension IDs are sent: never file contents, paths, or findings."
+          "markdownDescription": "Check each installed extension against the Visual Studio Marketplace. An extension that is installed but no longer published has usually been removed by Microsoft, which is the strongest available signal that something is wrong.\n\n**This is the only Free scanning feature that uses the network.** It is off by default. When enabled, only extension IDs are sent: never file contents, paths, or findings. Team reporting is separate and runs only with an active Team entitlement."
+        },
+        "extguard.team.apiBaseUrl": {
+          "type": "string",
+          "format": "uri",
+          "scope": "application",
+          "default": "",
+          "markdownDescription": "ExtGuard Team service URL. HTTPS is required except for exact localhost/loopback addresses during development. Free local scanning never uses this service."
         }
       }
     }

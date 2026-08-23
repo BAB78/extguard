@@ -1,9 +1,13 @@
 import * as vscode from 'vscode';
 import { RiskTreeProvider } from './ui/riskSidebar';
 import { scanVsixCommand, cleanDuplicatesCommand, showFeedInfoCommand } from './commands';
+import { TeamController } from './team/teamController';
+import type { TeamState } from './team/teamSession';
 
 export function activate(context: vscode.ExtensionContext) {
-    const riskTreeProvider = new RiskTreeProvider();
+    const team = new TeamController(context);
+    context.subscriptions.push(team);
+    const riskTreeProvider = new RiskTreeProvider(team);
 
     // 1.0.1 moved from the original Marketplace identity, babstudios.extguard, to
     // babstudios.extguard-security. VS Code treats those as two unrelated extensions and can
@@ -26,6 +30,22 @@ export function activate(context: vscode.ExtensionContext) {
     // Register Tree View
     const treeView = vscode.window.registerTreeDataProvider('extguard-security-risks', riskTreeProvider);
     context.subscriptions.push(treeView);
+
+    // A status refresh must not clear scan results. Only meaningful, settled Team changes
+    // redraw the sidebar; routine JWT rotation therefore cannot create a refresh/report loop.
+    let lastTeamSignature = '';
+    context.subscriptions.push(team.onDidChangeState((state) => {
+        if (state.kind === 'checking') return;
+        const signature = teamStateSignature(state);
+        if (signature !== lastTeamSignature) {
+            lastTeamSignature = signature;
+            riskTreeProvider.refreshTeamState();
+        }
+    }));
+    void team.initialize().catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : 'Unknown error.';
+        void vscode.window.showWarningMessage(`ExtGuard Team status could not be initialized: ${message} Free local scanning is unaffected.`);
+    });
 
     // Register Scan Command
     const scanCommand = vscode.commands.registerCommand('extguardSecurity.scan', () => {
@@ -78,3 +98,11 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+function teamStateSignature(state: TeamState): string {
+    if (state.kind === 'active') {
+        return `${state.kind}:${state.entitlement.status}:${state.entitlement.activeSeats}:${state.entitlement.seats}:${state.entitlement.currentPeriodEnd ?? ''}`;
+    }
+    if (state.kind === 'inactive' || state.kind === 'unavailable') return `${state.kind}:${state.message}`;
+    return state.kind;
+}

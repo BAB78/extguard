@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
+import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import EmbeddedPostgres from 'embedded-postgres';
@@ -57,6 +58,12 @@ async function runMigrations(): Promise<string> {
 }
 
 beforeAll(async () => {
+  // initdb refuses a directory that exists and is not empty, and Windows sometimes keeps a
+  // handle open long enough that the previous run's cleanup leaves a remnant behind. Without
+  // this the suite runs green once and is silently skipped on every run afterwards, which is
+  // worse than failing outright because the summary line still reads as a pass.
+  await rm(DATA_DIR, { recursive: true, force: true });
+
   postgres = new EmbeddedPostgres({
     databaseDir: DATA_DIR,
     user: 'postgres',
@@ -77,7 +84,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await pool?.end();
-  await postgres?.stop();
+  await postgres?.stop().catch(() => undefined);
+  await rm(DATA_DIR, { recursive: true, force: true }).catch(() => undefined);
 });
 
 describe('migration runner', () => {

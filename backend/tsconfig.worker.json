@@ -1,0 +1,14 @@
+{
+  // Type-checks the Cloudflare Worker entry point, which the main tsconfig deliberately
+  // excludes: Node cannot resolve the cloudflare: imports, and dist/ is only ever consumed by
+  // the migration runner. Wrangler bundles src/worker.ts itself, so this config emits nothing
+  // and exists purely so the Worker bootstrap is checked rather than assumed.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*.ts", "worker-configuration.d.ts"],
+  "exclude": ["node_modules", "dist", "tests"]
+}

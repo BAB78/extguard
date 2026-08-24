@@ -25,13 +25,15 @@ Node.js with the full reach of your user account: your files, your environment v
 terminal, your network. There is nothing to over-request because everything is already granted,
 and there is no prompt at install time telling you so.
 
-Between 2024 and 2026 researchers found over 1,200 extensions on the official Marketplace
-carrying confirmed malicious code, together reaching hundreds of millions of installs. In
-July and August 2026, 77 extensions on Open VSX were caught exfiltrating developer environment
-data. The attacks that worry me most are the boring ones: a typosquatted theme, or a leaked
-publisher token used to push a malicious update to an extension you already trust.
+Researchers cataloguing the Marketplace found 1,283 extensions carrying known malicious code,
+installed 229 million times between them [1]. Three weeks ago, 77 "evil twin" extensions were
+pulled from Open VSX after exfiltrating hostnames, workspace paths and CI data to a domain
+registered eleven days before the first upload [2]. The attacks that worry me most are the
+boring ones: a typosquatted theme, or a leaked publisher token used to push a malicious update
+to an extension you already trust.
 
-Meanwhile the median developer has around 80 installed and has read the source of none of them.
+I have 81 extensions installed and have read the source of none of them. I assume that is
+normal.
 
 ExtGuard reads what is already on disk and reports what each extension can reach. It is not a
 scanner and not a sandbox: it cannot stop an extension that is already running. It checks four
@@ -51,8 +53,8 @@ things, all locally.
 
 ### The interesting part is the false positives
 
-An early build produced **2,850 findings across 57 of 82 extensions** on my own machine, which
-I have every reason to believe is clean. That is not a security tool. That is a tool you learn
+An early build produced **2,850 findings across 57 of the 82 extensions** installed on my own
+machine at the time, which I have every reason to believe is clean. That is not a security tool. That is a tool you learn
 to ignore, and then you ignore the one finding that mattered.
 
 Three causes, all of which I suspect are common in this category:
@@ -65,9 +67,9 @@ Three causes, all of which I suspect are common in this category:
 
 Now behaviour rules run only on non-minified source with string bodies stripped before
 matching, generic tokens must be assigned to a credential-shaped identifier and clear an
-entropy floor, and structural patterns are the only ones trusted on their own. Same machine,
-**zero critical or high findings**, 26 medium ones that are all real (build scripts that
-genuinely call `child_process`).
+entropy floor, and structural patterns are the only ones trusted on their own. Same machine, rescanned
+today: **81 extensions, zero malicious matches, zero critical or high findings**, and 26 medium
+ones that are all real (build scripts that genuinely call `child_process`).
 
 ### The distinction I think matters most
 
@@ -75,8 +77,8 @@ The upstream feed publishes a "risky" list alongside the malicious one. It conta
 Microsoft's own PowerShell extension, and Jupyter, because those execute code and read your
 codebase by design.
 
-Merging those two lists flags five entirely legitimate extensions on a clean machine on first
-run. ExtGuard keeps them apart in the type system rather than by convention: malicious IDs
+Merging those two lists flags six entirely legitimate extensions on my machine on first run:
+GitLens, PowerShell, Jupyter, Continue, Cline and Copilot Chat. ExtGuard keeps them apart in the type system rather than by convention: malicious IDs
 produce findings, capability produces an explanation with a lightbulb next to it. A tool that
 opens by calling Microsoft's PowerShell extension a threat has told you nothing except that it
 cannot be trusted.
@@ -97,6 +99,9 @@ Source: https://github.com/BAB78/extguard
 
 I would rather hear that a check is wrong than that the idea is nice. If it flags something of
 yours incorrectly, the extension id and the finding are enough for me to fix it.
+
+[1] https://www.scworld.com/news/vscode-extensions-with-malicious-code-installed-229m-times
+[2] https://www.bleepingcomputer.com/news/security/77-open-vsx-extensions-found-harvesting-developer-info/
 
 ---
 
@@ -127,6 +132,16 @@ yours incorrectly, the extension id and the finding are enough for me to fix it.
 > It reads the extension directories directly, so Cursor and Windsurf work today. Open VSX as a
 > threat-intelligence source is not in yet, which matters because two of the recent incidents
 > were there.
+
+**"Would ExtGuard have caught the 77 Open VSX extensions?"** (expect this one)
+
+> Honestly, probably not on day one. They were newly uploaded, so no feed listed them yet, and
+> they exfiltrated over plain HTTPS to a normal-looking domain, which is not a pattern you can
+> match on without flagging every extension that makes a network call. What ExtGuard would have
+> shown you is that a freshly published extension with no history was reaching the network and
+> reading workspace paths, and after August 3rd the Marketplace-status check would have flagged
+> every one of them as removed-but-still-installed. That second part is the real value: the
+> gap between a takedown and you noticing is currently forever.
 
 **"How is this different from just checking the removed-packages list?"**
 

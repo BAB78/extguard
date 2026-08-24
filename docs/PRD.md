@@ -81,5 +81,9 @@ An extension's overall risk score (0 to 10) is calculated as the maximum or weig
 2. **Phase 2: BUILD** (Yo Code scaffolding, core scanning engines, Jest unit tests, tree view UI).
 3. **Phase 3: HARDEN & TEST** (False positive assessment, publisher allowlist, SECURITY.md).
 4. **Phase 4: PACKAGE** (VSCE packaging, store listing preparation, publishing strategy).
-5. **Phase 5: MONETIZE** (Team tier, licensing, Stripe server & client integration).
+5. **Phase 5: MONETIZE** (Team tier, PostgreSQL licensing, Stripe subscriptions, secure client
+   activation, and privacy-minimized report storage).
 6. **Phase 6: LAUNCH** (Socials/HN strategy, analytics setup).
+
+Phase 5 implementation is maintained separately from the free scanning boundary. Hosted checkout
+must remain disabled until the Railway and Stripe test matrix in `docs/PAYMENT_TESTING.md` passes.

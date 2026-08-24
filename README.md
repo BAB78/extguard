@@ -87,8 +87,9 @@ A tool that audits your editor for spyware cannot itself phone home.
   implying its knowledge is current.
 - If the database fails to load, ExtGuard says it could not check. It never reports a clean
   result it did not establish.
-- One optional feature uses the network, off by default, and sends only extension IDs. See
-  `extguard.checkMarketplace` below.
+- Optional network features are separated from local scanning. Marketplace availability checks
+  send only extension IDs when enabled. Team reporting requires an activated paid license and
+  sends only the reduced schema described below.
 
 Full detail in [SECURITY.md](SECURITY.md).
 
@@ -102,6 +103,22 @@ VS Code, Cursor, Windsurf, and any editor built on the VS Code API v1.75 or late
 2. Press refresh, or run **ExtGuard: Scan Extensions** from the command palette.
 3. Extensions are listed worst first. Expand any one to see its findings with file and line.
 4. Trust a publisher permanently under Settings, ExtGuard, Allowed Publishers.
+
+## Optional Team tier
+
+Team licensing does not gate or reduce the free scanner. A Team customer explicitly activates a
+license through **ExtGuard: Activate Team**. The extension then stores the license and its
+activation token in VS Code SecretStorage, where they are encrypted by the editor and are not
+synced between machines.
+
+An activated Team client can upload a privacy-minimized scan summary containing extension IDs,
+display names, numeric risk scores, fixed finding categories and severities, counts, a timestamp,
+and a product-scoped SHA-256 machine identifier. It cannot upload source code, matched secret
+values, finding descriptions, usernames, or absolute file paths.
+
+The Team API, database, Stripe checkout, and deployment instructions are documented in
+[docs/TEAM.md](docs/TEAM.md) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Team checkout remains
+disabled until the hosted test-mode release gate passes.
 
 ### Upgrading from the original 1.0.0 build
 
@@ -120,13 +137,17 @@ separate command and view IDs so the current scanner keeps working during migrat
 | **ExtGuard: Scan a .vsix File Before Installing** | Vets an extension package before you trust it. This is the only point at which you can act on a finding without having already run the code. |
 | **ExtGuard: Remove Superseded Extension Versions** | Old versions stay on disk after an update. They are never loaded, but they are still readable code, so if a version is later found malicious that copy is still there. Reports the reclaimable space and removes only copies the editor has released. The newest version is always kept. |
 | **ExtGuard: Show Threat Database Info** | How many records are bundled and when they were generated. The database ships with the extension, so its age matters and should not be guessed at. |
+| **ExtGuard: Activate Team** | Securely activates a paid Team license on this device. |
+| **ExtGuard: Deactivate Team** | Releases this device's Team seat and deletes its stored credentials. |
+| **ExtGuard: Show Team Status** | Validates the subscription and shows seat usage without affecting free scanning. |
 
 ## Settings
 
 | Setting | Default | Notes |
 |---|---|---|
 | `extguard.allowedPublishers` | `[]` | Publishers whose extensions bypass flagging. |
-| `extguard.checkMarketplace` | `false` | Checks whether each installed extension is still published. An extension installed but absent from the Marketplace was usually removed by Microsoft, which is the strongest signal available and comes from the first party. **This is the only feature that uses the network.** Only extension IDs are sent, never file contents, paths or findings. A failed lookup reports "could not check" and never reports removal, because being offline is not evidence against an extension. |
+| `extguard.checkMarketplace` | `false` | Checks whether each installed extension is still published. An extension installed but absent from the Marketplace was usually removed by Microsoft, which is the strongest signal available and comes from the first party. **This is the only optional Free scanning feature that uses the network.** Only extension IDs are sent, never file contents, paths or findings. A failed lookup reports "could not check" and never reports removal, because being offline is not evidence against an extension. |
+| `extguard.team.apiBaseUrl` | empty until deployment | HTTPS URL for the optional Team service. Plain HTTP is accepted only on an exact loopback address for local development. |
 
 ## Development
 

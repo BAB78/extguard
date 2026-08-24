@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https:" />
+    <title>ExtGuard Team activation</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./config.js" defer></script>
+    <script src="./success.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header"><div class="container nav-wrap"><a class="brand" href="./index.html"><span class="brand-mark">EG</span><span>ExtGuard</span></a></div></header>
+    <main class="page-main">
+      <div class="container">
+        <section class="message-card" aria-labelledby="page-title">
+          <p class="eyebrow">Secure activation</p>
+          <h1 id="page-title">Confirming your subscription</h1>
+          <p id="session-status" role="status" aria-live="polite">Checking the completed Stripe session. Keep this page open.</p>
+          <div id="license-panel" class="license-panel"><strong>Your ExtGuard Team license key</strong><code id="license-value" class="license-value"></code><button id="copy-license" class="button button-primary" type="button">Copy license key</button></div>
+          <div id="activation-help" hidden><p>In VS Code, open the Command Palette and run <strong>ExtGuard: Activate Team</strong>. Store the key in your password manager and do not share it publicly.</p><a class="button button-secondary" href="https://marketplace.visualstudio.com/items?itemName=babstudios.extguard-security">Open ExtGuard</a></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

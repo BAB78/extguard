@@ -25,3 +25,12 @@ scan-results.json
 **/*.test.ts
 **/*.map
 .git/**
+
+# Agent skill packs installed for local development tooling. Symlinked directories break
+# the packaging secret scanner, and none of this belongs in a shipped extension.
+.agents/**
+skills-lock.json
+.wrangler/**
+backend/**
+.claude/**
+.agents/**

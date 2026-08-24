@@ -12,7 +12,8 @@ const envSchema = z
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
     DATABASE_URL: z.string().min(1),
     DATABASE_SSL: booleanString.default('true'),
-    STRIPE_SECRET_KEY: z.string().regex(/^sk_(test|live)_/),
+    // Restricted keys (rk_) are the least-privilege option and are preferred in live mode.
+    STRIPE_SECRET_KEY: z.string().regex(/^(sk|rk)_(test|live)_/),
     STRIPE_WEBHOOK_SECRET: z.string().regex(/^whsec_/),
     STRIPE_PRICE_ID: z.string().regex(/^price_/),
     CHECKOUT_SUCCESS_URL: z.string().url().refine(
@@ -34,7 +35,10 @@ const envSchema = z
     CORS_ALLOWED_ORIGINS: z.string().min(1),
   })
   .superRefine((env, context) => {
-    const stripeMode = env.STRIPE_SECRET_KEY.startsWith('sk_live_') ? 'live' : 'test';
+    // Must match rk_live_ as well as sk_live_. Checking only the sk_ form meant a restricted
+    // live key was read as test mode, which quietly skipped the HTTPS requirement below on
+    // exactly the setup that handles real money.
+    const stripeMode = /^(sk|rk)_live_/.test(env.STRIPE_SECRET_KEY) ? 'live' : 'test';
     if (env.NODE_ENV === 'production' && stripeMode === 'live') {
       for (const [name, url] of [
         ['CHECKOUT_SUCCESS_URL', env.CHECKOUT_SUCCESS_URL],

@@ -2,7 +2,7 @@
   "name": "extguard-security",
   "displayName": "ExtGuard",
   "description": "Audits installed VS Code extensions for security risks, leaked secrets, and malicious behavior.",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "publisher": "babstudios",
   "engines": {
     "vscode": "^1.75.0"
@@ -120,8 +120,8 @@
           "type": "string",
           "format": "uri",
           "scope": "application",
-          "default": "",
-          "markdownDescription": "ExtGuard Team service URL. HTTPS is required except for exact localhost/loopback addresses during development. Free local scanning never uses this service."
+          "default": "https://extguard-api.nivroo.workers.dev",
+          "markdownDescription": "ExtGuard Team service URL. Defaults to the hosted ExtGuard Team service. Point this at your own deployment for full data sovereignty. HTTPS is required except for exact localhost/loopback addresses during development. Free local scanning never contacts this service."
         }
       }
     }

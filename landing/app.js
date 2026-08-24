@@ -7,7 +7,7 @@
   const status = document.getElementById("checkout-status");
   if (!form || !button || !emailInput || !seatsInput || !status) return;
   const apiBase = normalizeApiBase(window.EXTGUARD_CONFIG?.apiBaseUrl);
-  if (!apiBase) {
+  if (!apiBase || window.EXTGUARD_CONFIG?.checkoutOpen !== true) {
     button.disabled = true;
     button.textContent = "Team checkout is not open yet";
     setStatus("The free extension remains available without a time limit.");

@@ -48,6 +48,27 @@ In Stripe test mode:
 Do not create live objects until the test flow passes. Test and live product IDs, prices, API keys,
 and webhook secrets are separate sets and must never be mixed.
 
+### Managed Payments requires a product tax code
+
+If Managed Payments is enabled (Stripe acts as merchant of record and handles VAT), every
+product must carry a `tax_code` or Checkout fails outright with:
+
+```
+Invalid line_items[0]: the product tax code is missing.
+```
+
+ExtGuard Team uses **`txcd_10103101`** (Software as a service, electronic download, business
+use). That is the correct classification because the extension is downloaded by the buyer and
+the Team tier is a cloud subscription sold to companies. `txcd_10103001` is the wrong one: it
+explicitly covers SaaS where the buyer downloads nothing.
+
+```bash
+stripe products update <product_id> --tax-code=txcd_10103101
+```
+
+Verified against a live sandbox purchase: 3 seats at $9 charged $27.00, licence provisioned,
+seat limit enforced at 3, and cancellation revoked access immediately.
+
 ## 2. Create Railway services
 
 1. Create an empty Railway project.

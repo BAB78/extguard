@@ -14,7 +14,8 @@
     "migrate": "node dist/migrate.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "devdb": "node scripts/devdb.mjs"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -163,6 +163,16 @@ export function createApp(dependencies: AppDependencies): express.Express {
 
   app.use(express.json({ limit: '512kb', strict: true }));
 
+  // Liveness: answers without touching the database on purpose.
+  //
+  // The free Postgres tier bills compute by the hour and wakes on any query, so pointing a
+  // platform health check at a route that runs SELECT 1 every few minutes keeps the database
+  // awake permanently and burns the monthly quota on nothing. Platform health checks and any
+  // keep-warm pinger should use this route; /health stays as the real readiness probe.
+  app.get('/livez', (_request, response) => {
+    response.status(200).json({ status: 'alive' });
+  });
+
   app.get('/health', asyncHandler(async (_request, response) => {
     try {
       await repository.health();

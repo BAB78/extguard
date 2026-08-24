@@ -15,7 +15,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "smoke": "node scripts/smoke.mjs",
-    "devdb": "node scripts/devdb.mjs"
+    "devdb": "node scripts/devdb.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json",
+    "cf:types": "wrangler types",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "migrate:remote": "npm run build && node dist/migrate.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -29,6 +34,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260823.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
@@ -39,6 +45,7 @@
     "supertest": "^7.1.4",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.125.0"
   }
 }

@@ -7,3 +7,5 @@ backend/.env
 .vscode-test/
 backend/dist/
 backend/coverage/
+backend/.wrangler/
+backend/worker-configuration.d.ts

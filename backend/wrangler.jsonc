@@ -17,13 +17,27 @@
     "enabled": true
   },
 
+  // body-parser pulls in iconv-lite, which fails Workers startup validation: esbuild's CJS
+  // interop leaves its internal require("./streams") non-callable. This API is JSON-only and
+  // JSON is UTF-8 by definition, so the substitute covers every charset that can legitimately
+  // arrive and refuses the rest rather than guessing. See src/shims/iconv-lite.ts.
+  "alias": {
+    "iconv-lite": "./src/shims/iconv-lite.ts"
+  },
+
   // Hyperdrive pools Postgres connections on Cloudflare's side. Workers spin up many isolates,
   // and without pooling each one opens its own connection and exhausts the database's
   // connection limit long before any real traffic arrives.
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "REPLACE_WITH_HYPERDRIVE_ID",
+      "id": "a97cf4ff54cb428f886b2cb9de40619c",
+      // Query caching MUST stay disabled on this config. Hyperdrive caches read queries by
+      // default, which for a licensing API means authorisation answers are served from cache:
+      // a cancelled subscription kept validating and issuing fresh access tokens even though
+      // the row in Postgres already said "canceled". Correct entitlement matters more here
+      // than shaving latency off a request that runs a few times a day per customer.
+      // Set on the config itself via the API; this comment records why.
       "localConnectionString": "postgresql://postgres:postgres@127.0.0.1:54331/extguard_dev"
     }
   ],
@@ -35,6 +49,10 @@
     "LOG_LEVEL": "info",
     "TRUST_PROXY": "1",
     "DATABASE_SSL": "false",
-    "JWT_TTL_SECONDS": "86400"
+    "JWT_TTL_SECONDS": "86400",
+    "CORS_ALLOWED_ORIGINS": "https://extguard.pages.dev",
+    "CHECKOUT_SUCCESS_URL": "https://extguard.pages.dev/success.html?session_id={CHECKOUT_SESSION_ID}",
+    "CHECKOUT_CANCEL_URL": "https://extguard.pages.dev/index.html",
+    "BILLING_PORTAL_RETURN_URL": "https://extguard.pages.dev/index.html"
   }
 }

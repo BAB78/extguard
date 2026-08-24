@@ -111,6 +111,16 @@ export function createApp(dependencies: AppDependencies): express.Express {
       limit,
       standardHeaders: 'draft-7',
       legacyHeaders: false,
+      // Cloudflare Workers have no socket, so request.ip is undefined and the default key
+      // generator throws ERR_ERL_UNDEFINED_IP_ADDRESS on every request. That did not merely
+      // log noise: it meant the limits guarding licence-key activation were not being applied
+      // at all, which is the one endpoint where an attacker can guess in a loop.
+      // CF-Connecting-IP is set by Cloudflare itself and cannot be spoofed by the client.
+      keyGenerator: (request) => request.header('cf-connecting-ip')
+        ?? request.header('x-real-ip')
+        ?? request.ip
+        ?? 'unknown',
+      validate: { ip: false, xForwardedForHeader: false },
       handler: (_request, response) => errorResponse(
         response,
         429,
@@ -138,12 +148,30 @@ export function createApp(dependencies: AppDependencies): express.Express {
     express.raw({ type: 'application/json', limit: '1mb' }),
     asyncHandler(async (request, response) => {
       const signature = request.header('stripe-signature');
-      if (!signature || !Buffer.isBuffer(request.body)) {
+      // Stripe signs the exact bytes it sent, so the raw body must reach constructEvent
+      // untouched. express.raw() yields a Node Buffer under Node, but a plain Uint8Array on
+      // Cloudflare Workers, where Buffer is a polyfill. Testing only with Buffer.isBuffer
+      // rejected every genuine webhook there with a 400 before the signature was ever checked,
+      // which Stripe then retried indefinitely. Converting preserves the bytes; anything that
+      // is not binary is still refused, because a parsed object would mean the body had been
+      // re-serialised and the signature could never match.
+      const body: unknown = request.body;
+      const rawBody = Buffer.isBuffer(body)
+        ? body
+        : body instanceof Uint8Array
+          ? Buffer.from(body)
+          : null;
+      if (!signature || !rawBody) {
+        logger.warn('stripe.webhook_malformed', {
+          requestId: response.locals.requestId,
+          hasSignature: Boolean(signature),
+          bodyType: body === null || body === undefined ? 'none' : typeof body,
+        });
         errorResponse(response, 400, 'invalid_webhook', 'A signed JSON webhook is required.');
         return;
       }
       try {
-        const webhook = await billing.parseWebhook(request.body, signature);
+        const webhook = await billing.parseWebhook(rawBody, signature);
         const { material } = freshMaterial();
         const processed = await repository.applyWebhook(webhook, material);
         response.status(200).json({ received: true, duplicate: !processed });

@@ -61,6 +61,9 @@ function unixDate(value: unknown): Date | null {
 export class StripeBilling implements BillingGateway {
   private readonly stripe: Stripe;
 
+  /** WebCrypto-backed signing, so webhook verification works on Workers as well as Node. */
+  private readonly cryptoProvider = Stripe.createSubtleCryptoProvider();
+
   constructor(private readonly options: StripeBillingOptions) {
     this.stripe = new Stripe(options.secretKey, {
       maxNetworkRetries: 2,
@@ -98,10 +101,22 @@ export class StripeBilling implements BillingGateway {
   async parseWebhook(payload: Buffer, signature: string): Promise<BillingWebhook> {
     let event: Stripe.Event;
     try {
-      event = this.stripe.webhooks.constructEvent(
+      // constructEventAsync rather than constructEvent, and with an explicit crypto provider.
+      //
+      // The synchronous form computes its HMAC through Node's crypto module, which the
+      // Cloudflare Workers runtime does not provide in the shape the SDK expects. There it
+      // fails for every genuine webhook, and it fails as a signature mismatch, which reads
+      // exactly like a misconfigured signing secret. That cost a real debugging detour:
+      // replacing the secret repeatedly could never have fixed it.
+      //
+      // WebCrypto is available on both runtimes, so this single path serves Workers and Node
+      // alike and the behaviour under test is the behaviour in production.
+      event = await this.stripe.webhooks.constructEventAsync(
         payload,
         signature,
         this.options.webhookSecret,
+        undefined,
+        this.cryptoProvider,
       );
     } catch {
       throw new InvalidWebhookSignatureError();

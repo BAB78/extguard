@@ -1,3 +1,3 @@
 window.EXTGUARD_CONFIG = Object.freeze({
-  apiBaseUrl: "",
+  apiBaseUrl: "https://extguard-api.nivroo.workers.dev",
 });
